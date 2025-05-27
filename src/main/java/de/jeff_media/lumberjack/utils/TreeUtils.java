@@ -14,17 +14,18 @@ public class TreeUtils {
 
     private final LumberJack main;
 
-    private static final Map<Tag<Material>, Material> treeFlavors = Map.of(
-            MaterialSetTag.ACACIA_LOGS, Material.ACACIA_LOG,
-            MaterialSetTag.BIRCH_LOGS, Material.BIRCH_LOG,
-            MaterialSetTag.CRIMSON_STEMS, Material.CRIMSON_STEM,
-            MaterialSetTag.CHERRY_LOGS, Material.CHERRY_LOG,
-            MaterialSetTag.DARK_OAK_LOGS, Material.DARK_OAK_LOG,
-            MaterialSetTag.JUNGLE_LOGS, Material.JUNGLE_LOG,
-            MaterialSetTag.MANGROVE_LOGS, Material.MANGROVE_LOG,
-            MaterialSetTag.OAK_LOGS, Material.OAK_LOG,
-            MaterialSetTag.SPRUCE_LOGS, Material.SPRUCE_LOG,
-            MaterialSetTag.WARPED_STEMS, Material.WARPED_STEM
+    private static final Map<Tag<Material>, Material> treeFlavors = Map.ofEntries(
+            Map.entry(MaterialSetTag.ACACIA_LOGS, Material.ACACIA_LOG),
+            Map.entry(MaterialSetTag.BIRCH_LOGS, Material.BIRCH_LOG),
+            Map.entry(MaterialSetTag.CRIMSON_STEMS, Material.CRIMSON_STEM),
+            Map.entry(MaterialSetTag.CHERRY_LOGS, Material.CHERRY_LOG),
+            Map.entry(MaterialSetTag.DARK_OAK_LOGS, Material.DARK_OAK_LOG),
+            Map.entry(MaterialSetTag.JUNGLE_LOGS, Material.JUNGLE_LOG),
+            Map.entry(MaterialSetTag.MANGROVE_LOGS, Material.MANGROVE_LOG),
+            Map.entry(MaterialSetTag.OAK_LOGS, Material.OAK_LOG),
+            Map.entry(MaterialSetTag.PALE_OAK_LOGS, Material.PALE_OAK_LOG),
+            Map.entry(MaterialSetTag.SPRUCE_LOGS, Material.SPRUCE_LOG),
+            Map.entry(MaterialSetTag.WARPED_STEMS, Material.WARPED_STEM)
     );
 
     public TreeUtils(LumberJack main) {
@@ -64,7 +65,8 @@ public class TreeUtils {
                     Material.PODZOL,
                     Material.SNOW_BLOCK,
                     Material.ROOTED_DIRT,
-                    Material.MOSS_BLOCK
+                    Material.MOSS_BLOCK,
+                    Material.PALE_MOSS_BLOCK
             };
         }
 
