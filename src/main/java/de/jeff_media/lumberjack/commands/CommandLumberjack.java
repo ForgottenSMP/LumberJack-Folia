@@ -41,12 +41,12 @@ public class CommandLumberjack {
                     CommandSender sender = c.getSource().getSender();
 
                     if (!(sender instanceof Player player)) {
-                        sender.sendMessage("You must be a in-game to run this command.");
+                        sender.sendPlainMessage("You must be a in-game to run this command.");
                         return Command.SINGLE_SUCCESS;
                     }
 
                     Block target = player.getTargetBlock(null, 20);
-                    player.sendMessage(String.valueOf(BlockTracker.isPlayerPlacedBlock(target)));
+                    player.sendPlainMessage(String.valueOf(BlockTracker.isPlayerPlacedBlock(target)));
 
                     return Command.SINGLE_SUCCESS;
                 }).build();
@@ -55,7 +55,7 @@ public class CommandLumberjack {
             CommandSender sender = c.getSource().getSender();
 
             if (!(sender instanceof Player player)) {
-                sender.sendMessage("You must be a in-game to run this command.");
+                sender.sendPlainMessage("You must be a in-game to run this command.");
                 return Command.SINGLE_SUCCESS;
             }
 

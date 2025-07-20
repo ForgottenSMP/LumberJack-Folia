@@ -188,7 +188,8 @@ public class BlockBreakListener implements Listener {
                 BlockData blockData = logAbove.getBlockData().clone();
                 logAbove.setType(Material.AIR);
                 FallingBlock fallingBlock = logAbove.getLocation().getWorld()
-                        .spawnFallingBlock(logAbove.getLocation().add(plugin.fallingBlockOffset), blockData);
+                        .spawn(logAbove.getLocation().add(plugin.fallingBlockOffset), FallingBlock.class,
+                               e -> e.setBlockData(blockData));
                 if (plugin.getConfig().getBoolean("prevent-torch-exploit")) {
                     fallingBlock.getPersistentDataContainer().set(fallingLogKey, PersistentDataType.BOOLEAN, true);
                 }
