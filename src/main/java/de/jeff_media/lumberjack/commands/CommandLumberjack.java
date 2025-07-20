@@ -65,16 +65,16 @@ public class CommandLumberjack {
             }
 
             if (player.hasPermission("lumberjack.force") && !player.hasPermission("lumberjack.force.ignore")) {
-                player.sendMessage(plugin.messages.MSG_CAN_NOT_DISABLE);
+                player.sendRichMessage(plugin.messages.MSG_CAN_NOT_DISABLE);
                 return Command.SINGLE_SUCCESS;
             }
 
             plugin.togglePlayerSetting(player);
 
             if (plugin.getPlayerSetting(player).gravityEnabled) {
-                sender.sendMessage(plugin.messages.MSG_ACTIVATED);
+                sender.sendRichMessage(plugin.messages.MSG_ACTIVATED);
             } else {
-                sender.sendMessage(plugin.messages.MSG_DEACTIVATED);
+                sender.sendRichMessage(plugin.messages.MSG_DEACTIVATED);
             }
 
             return Command.SINGLE_SUCCESS;

@@ -109,95 +109,82 @@ disabled-worlds:
 ##### localization ######
 #########################
 
-# Available color codes:
-# &0 Black        &6 Gold       &c Red
-# &1 Dark Blue    &7 Gray       &d Light Purple
-# &2 Dark Green   &8 Dark Gray  &e Yellow
-# &3 Dark Aqua    &9 Blue       &f White
-# &4 Dark Red     &a Green     
-# &5 Dark Purple  &b Aqua
-
-# Available formatting codes:
-# &k Obfuscated   &m Strikethrough
-# &l Bold         &o Italic
-# &n Underline    &r Reset
-
 ##### English
-message-gravity-enabled: "&7Tree gravity has been &aenabled&7."
-message-gravity-disabled: "&7Tree gravity has been &cdisabled&7."
-message-when-breaking-log: "&7Hint: Type &6/lumberjack&7 to enable tree gravity."
-message-when-breaking-log2: "&7Hint: Type &6/lumberjack&7 to disable tree gravity."
-message-can-not-disable: "&cYou are not allowed to disable tree gravity."
+message-gravity-enabled: "<gray>Tree gravity has been <green>enabled<gray>."
+message-gravity-disabled: "<gray>Tree gravity has been <red>disabled<gray>."
+message-when-breaking-log: "<gray>Hint: Type <gold>/lumberjack<gray> to enable tree gravity."
+message-when-breaking-log2: "<gray>Hint: Type <gold>/lumberjack<gray> to disable tree gravity."
+message-can-not-disable: "<red>You are not allowed to disable tree gravity."
 
 ##### Bulgarian
-#message-gravity-enabled: "&7Дървестната гравитация беше &aактивирана&7."
-#message-gravity-disabled: "&7Дървестната гравитация беше &cдеактивирана&7."
-#message-when-breaking-log: "&7Подсказка: Напишете &6/lumberjack&7, за да активирате дървестната гравитация."
-#message-when-breaking-log2: "&7Подсказка: Напишете &6/lumberjack&7, за да деактивирате дървестната гравитация."
-#message-can-not-disable: "&cНе Ви е позволено да изключвате дървестната гравитация."
+#message-gravity-enabled: "<gray>Дървестната гравитация беше <green>активирана<gray>."
+#message-gravity-disabled: "<gray>Дървестната гравитация беше <red>деактивирана<gray>."
+#message-when-breaking-log: "<gray>Подсказка: Напишете <gold>/lumberjack<gray>, за да активирате дървестната гравитация."
+#message-when-breaking-log2: "<gray>Подсказка: Напишете <gold>/lumberjack<gray>, за да деактивирате дървестната гравитация."
+#message-can-not-disable: "<red>Не Ви е позволено да изключвате дървестната гравитация."
 
 ##### Dutch
-#message-gravity-enabled: "&7Boom zwaartekracht is &aingeschakeld&7."
-#message-gravity-disabled: "&7Boom zwaartekracht is &cuitgeschakeld&7."
-#message-when-breaking-log: "&7Hint: Type &6/lumberjack&7 om boom zwaartekracht in te schakelen."
-#message-when-breaking-log2: "&7Hint: Type &6/lumberjack&7 om boom zwaartekracht uit te schakelen."
-#message-can-not-disable: "&cJe bent niet toegestaan om boom zwaartekracht uit te schakelen."
+#message-gravity-enabled: "<gray>Boom zwaartekracht is <green>ingeschakeld<gray>."
+#message-gravity-disabled: "<gray>Boom zwaartekracht is <red>uitgeschakeld<gray>."
+#message-when-breaking-log: "<gray>Hint: Type <gold>/lumberjack<gray> om boom zwaartekracht in te schakelen."
+#message-when-breaking-log2: "<gray>Hint: Type <gold>/lumberjack<gray> om boom zwaartekracht uit te schakelen."
+#message-can-not-disable: "<red>Je bent niet toegestaan om boom zwaartekracht uit te schakelen."
 
 ##### French
-#message-gravity-enabled: "&7La gravité d'arbre a été &aactivée&7."
-#message-gravity-disabled: "&7La gravité d'arbre a été &cdésactivée&7."
-#message-when-breaking-log: "&7Astuce: écris &6/lumberjack&7 pour activer la gravité d'arbre."
-#message-when-breaking-log2: "&7Astuce: écris &6/lumberjack&7 pour désactiver la gravité d'arbre."
-#message-can-not-disable: "&cVous n'avez pas la permission de désactiver la gravité d'arbre."
+#message-gravity-enabled: "<gray>La gravité d'arbre a été <green>activée<gray>."
+#message-gravity-disabled: "<gray>La gravité d'arbre a été <red>désactivée<gray>."
+#message-when-breaking-log: "<gray>Astuce: écris <gold>/lumberjack<gray> pour activer la gravité d'arbre."
+#message-when-breaking-log2: "<gray>Astuce: écris <gold>/lumberjack<gray> pour désactiver la gravité d'arbre."
+#message-can-not-disable: "<red>Vous n'avez pas la permission de désactiver la gravité d'arbre."
 
 ##### Hungarian
-# message-gravity-enabled: "&7A fa gravitációja &aengedélyezve&7 lett."
-# message-gravity-disabled: "&7A fa gravitációja le lett &ctiltva&7."
-# message-when-breaking-log: "&7Tipp: Írd be a &6/lumberjack&7 parancsot, hogy engedélyezd a fa gravitációját."
-# message-when-breaking-log2: "&7Tipp: Írd be a &6/lumberjack&7 parancsot, hogy letiltsd a fa gravitációját."
-# message-can-not-disable: "&cNeked nem engedélyezett, hogy letiltsd a fa gravitációját."
+# message-gravity-enabled: "<gray>A fa gravitációja <green>engedélyezve<gray> lett."
+# message-gravity-disabled: "<gray>A fa gravitációja le lett <red>tiltva<gray>."
+# message-when-breaking-log: "<gray>Tipp: Írd be a <gold>/lumberjack<gray> parancsot, hogy engedélyezd a fa gravitációját."
+# message-when-breaking-log2: "<gray>Tipp: Írd be a <gold>/lumberjack<gray> parancsot, hogy letiltsd a fa gravitációját."
+# message-can-not-disable: "<red>Neked nem engedélyezett, hogy letiltsd a fa gravitációját."
 
 ##### Polish
-#message-gravity-enabled: "&7Grawitacja drzew została &awłączona&7."
-#message-gravity-disabled: "&7Grawitacja drzew została &cwyłączona&7."
-#message-when-breaking-log: "&7Podpowiedź: Wpisz &6/lumberjack&7 aby włączyć grawitację drzew."
-#message-when-breaking-log2: "&7Podpowiedź: Wpisz &6/lumberjack&7 aby wyłączyć grawitację drzew."
-#message-can-not-disable: "&cNie możesz wyłączyć grawitacji drzew."
+#message-gravity-enabled: "<gray>Grawitacja drzew została <green>włączona<gray>."
+#message-gravity-disabled: "<gray>Grawitacja drzew została <red>wyłączona<gray>."
+#message-when-breaking-log: "<gray>Podpowiedź: Wpisz <gold>/lumberjack<gray> aby włączyć grawitację drzew."
+#message-when-breaking-log2: "<gray>Podpowiedź: Wpisz <gold>/lumberjack<gray> aby wyłączyć grawitację drzew."
+#message-can-not-disable: "<red>Nie możesz wyłączyć grawitacji drzew."
 
 ##### Romanian
-#message-gravity-enabled: "&7Graviația copacilor a fost &aactivată&7."
-#message-gravity-disabled: "&7Graviația copacilor a fost &cdezactivată&7."
-#message-when-breaking-log: "&7Sfat: Scrie &6/lumberjack&7 pentru a activa gravitația copacilor."
-#message-when-breaking-log2: "&7Sfat: Scrie &6/lumberjack&7 pentru a dezactiva gravitația copacilor."
-#message-can-not-disable: "&cNu ai permisiunea să dezactivezi gravitația copacilor."
+#message-gravity-enabled: "<gray>Graviația copacilor a fost <green>activată<gray>."
+#message-gravity-disabled: "<gray>Graviația copacilor a fost <red>dezactivată<gray>."
+#message-when-breaking-log: "<gray>Sfat: Scrie <gold>/lumberjack<gray> pentru a activa gravitația copacilor."
+#message-when-breaking-log2: "<gray>Sfat: Scrie <gold>/lumberjack<gray> pentru a dezactiva gravitația copacilor."
+#message-can-not-disable: "<red>Nu ai permisiunea să dezactivezi gravitația copacilor."
 
 ##### Russian
-#message-gravity-enabled: "&7Гравитация для деревьев &aвключена&7."
-#message-gravity-disabled: "&7Гравитация для деревьев &cотключена&7."
-#message-when-breaking-log: "&7Подсказка: Введите &6/lumberjack&7, чтобы включить гравитацию для деревьев."
-#message-when-breaking-log2: "&7Подсказка: Введите &6/lumberjack&7, чтобы отключить гравитацию для деревьев."
-#message-can-not-disable: "&cВы не можете отключить гравитацию для деревьев."
+#message-gravity-enabled: "<gray>Гравитация для деревьев <green>включена<gray>."
+#message-gravity-disabled: "<gray>Гравитация для деревьев <red>отключена<gray>."
+#message-when-breaking-log: "<gray>Подсказка: Введите <gold>/lumberjack<gray>, чтобы включить гравитацию для деревьев."
+#message-when-breaking-log2: "<gray>Подсказка: Введите <gold>/lumberjack<gray>, чтобы отключить гравитацию для деревьев."
+#message-can-not-disable: "<red>Вы не можете отключить гравитацию для деревьев."
 
 ##### Spanish
-#message-gravity-enabled: "&7La gravedad de arboles ha sido &ahabilitada&7."
-#message-gravity-disabled: "&7La gravedad de arboles ha sido &cdeshabilitada&7."
-#message-when-breaking-log: "&7Lumberjack: Utiliza &6/lumberjack&7 para habilitar la gravedad de arboles."
-#message-when-breaking-log2: "&7Lumberjack: Utiliza &6/lumberjack&7 para deshabilitar la gravedad de arboles."
-#message-can-not-disable: "&cNo tienes permitido deshabilitar la gravedad de arboles."
+#message-gravity-enabled: "<gray>La gravedad de arboles ha sido <green>habilitada<gray>."
+#message-gravity-disabled: "<gray>La gravedad de arboles ha sido <red>deshabilitada<gray>."
+#message-when-breaking-log: "<gray>Lumberjack: Utiliza <gold>/lumberjack<gray> para habilitar la gravedad de arboles."
+#message-when-breaking-log2: "<gray>Lumberjack: Utiliza <gold>/lumberjack<gray> para deshabilitar la gravedad de arboles."
+#message-can-not-disable: "<red>No tienes permitido deshabilitar la gravedad de arboles."
 
 ##### Swedish
-#message-gravity-enabled: "&7Trädgravitation har &aaktiverats&7."
-#message-gravity-disabled: "&7Trädgravitationen har &cinaktiverats&7."
-#message-when-breaking-log: "&7Tips: Skriv &6/lumberjack&7 för att aktivera trädgravitation."
-#message-when-breaking-log2: "&7Tips: Skriv &6/lumberjack&7 för att inaktivera trädgravitationen."
-#message-can-not-disable: "&cDu får inte inaktivera trädgravitationen."
+#message-gravity-enabled: "<gray>Trädgravitation har <green>aktiverats<gray>."
+#message-gravity-disabled: "<gray>Trädgravitationen har <red>inaktiverats<gray>."
+#message-when-breaking-log: "<gray>Tips: Skriv <gold>/lumberjack<gray> för att aktivera trädgravitation."
+#message-when-breaking-log2: "<gray>Tips: Skriv <gold>/lumberjack<gray> för att inaktivera trädgravitationen."
+#message-can-not-disable: "<red>Du får inte inaktivera trädgravitationen."
 
 ##### Turkish
-#message-gravity-enabled: "&7Ağaç yerçekimi &aaktifleştirildi&7."
-#message-gravity-disabled: "&7Ağaç yerçekimi &cdeaktifleştirildi&7."
-#message-when-breaking-log: "&7İpucu: Ağaç yerçekimini aktifleştirmek için &6/lumberjack&7 yazınız."
-#message-when-breaking-log2: "&7İpucu: Ağaç yerçekimini deaktifleştirmek için &6/lumberjack&7 yazınız."
-#message-can-not-disable: "&cAğaç yerçekimini deaktifleştirmek için yetkiniz yok."
+#message-gravity-enabled: "<gray>Ağaç yerçekimi <green>aktifleştirildi<gray>."
+#message-gravity-disabled: "<gray>Ağaç yerçekimi <red>deaktifleştirildi<gray>."
+#message-when-breaking-log: "<gray>İpucu: Ağaç yerçekimini aktifleştirmek için <gold>/lumberjack<gray> yazınız."
+#message-when-breaking-log2: "<gray>İpucu: Ağaç yerçekimini deaktifleştirmek için <gold>/lumberjack<gray> yazınız."
+#message-can-not-disable: "<red>Ağaç yerçekimini deaktifleştirmek için yetkiniz yok."
 
 
 #########################

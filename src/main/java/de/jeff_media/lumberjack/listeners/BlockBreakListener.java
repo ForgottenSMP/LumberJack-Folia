@@ -96,7 +96,7 @@ public class BlockBreakListener implements Listener {
                 if (!plugin.getPlayerSetting(p).hasSeenMessage) {
                     plugin.getPlayerSetting(p).hasSeenMessage = true;
                     if (plugin.getConfig().getBoolean("show-message-when-breaking-log")) {
-                        p.sendMessage(plugin.messages.MSG_COMMANDMESSAGE);
+                        p.sendRichMessage(plugin.messages.MSG_COMMANDMESSAGE);
                     }
                 }
                 return;
@@ -104,7 +104,7 @@ public class BlockBreakListener implements Listener {
                 if (!plugin.getPlayerSetting(p).hasSeenMessage) {
                     plugin.getPlayerSetting(p).hasSeenMessage = true;
                     if (plugin.getConfig().getBoolean("show-message-when-breaking-log-and-gravity-is-enabled")) {
-                        p.sendMessage(plugin.messages.MSG_COMMANDMESSAGE2);
+                        p.sendRichMessage(plugin.messages.MSG_COMMANDMESSAGE2);
                     }
                 }
             }
