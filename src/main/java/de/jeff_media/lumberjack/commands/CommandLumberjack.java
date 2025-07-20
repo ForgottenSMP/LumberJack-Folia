@@ -17,7 +17,6 @@ import java.util.List;
 
 import static io.papermc.paper.command.brigadier.Commands.literal;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CommandLumberjack {
 
     final LumberJack plugin;

@@ -28,9 +28,7 @@ public class DecayTask extends BukkitRunnable {
                 if (isCancelled()) return;
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
                     if (DecayUtils.isLeaf(leaf)) {
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            leaf.breakNaturally();
-                        });
+                        Bukkit.getScheduler().runTask(plugin, () -> leaf.breakNaturally());
                     }
                 }, rand.nextInt((int) Ticks.fromSeconds(plugin.getConfig().getDouble("fast-leaves-decay-duration"))));
             }

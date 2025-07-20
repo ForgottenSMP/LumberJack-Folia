@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-
-@SuppressWarnings("UnstableApiUsage")
 public class LumberJack extends JavaPlugin {
 
     private static LumberJack instance;
@@ -47,8 +45,7 @@ public class LumberJack extends JavaPlugin {
     boolean gravityEnabledByDefault = false;
     HashMap<Player, PlayerSetting> perPlayerSettings;
     boolean debug = false;
-    private boolean usingMatchingConfig = true;
-    public final Set<Integer> decayTasks = new HashSet<>();
+	public final Set<Integer> decayTasks = new HashSet<>();
 
     public HashSet<BukkitTask> getScheduledTasks() {
         return scheduledTasks;
@@ -118,7 +115,6 @@ public class LumberJack extends JavaPlugin {
             showOldConfigWarning();
             ConfigUpdater configUpdater = new ConfigUpdater(this);
             configUpdater.updateConfig();
-            usingMatchingConfig = true;
             //createConfig();
         }
 

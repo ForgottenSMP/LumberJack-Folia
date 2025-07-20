@@ -26,7 +26,6 @@ public class DecayUtils {
                 for (int z = blockZ - RADIUS; z <= blockZ + RADIUS; z++) {
                     Block candidate = world.getBlockAt(x, y, z);
                     if(candidate == originalLeaf.getBlock()) continue;
-                    if(candidate==null) continue;
                     if (candidate.getType().isAir()) continue;
                     if (!isLeaf(candidate)) {
                         continue;
@@ -57,12 +56,10 @@ public class DecayUtils {
     }
 
     private static boolean isMatchingLeaf(Material leaf1, Material leaf2) {
-        switch (leaf1) {
-            case AZALEA_LEAVES:
-            case FLOWERING_AZALEA_LEAVES:
-                return leaf2 == Material.AZALEA_LEAVES || leaf2 == Material.FLOWERING_AZALEA_LEAVES;
-            default:
-                return leaf1 == leaf2;
-        }
+		return switch (leaf1) {
+			case AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES ->
+					leaf2 == Material.AZALEA_LEAVES || leaf2 == Material.FLOWERING_AZALEA_LEAVES;
+			default -> leaf1 == leaf2;
+		};
     }
 }

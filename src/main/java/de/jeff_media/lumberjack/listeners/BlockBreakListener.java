@@ -11,7 +11,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,58 +34,28 @@ public class BlockBreakListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onLeavesBreak(BlockBreakEvent event) {
-
-        if (!(event.getBlock().getBlockData() instanceof Leaves) && !MaterialSetTag.WART_BLOCKS.isTagged(event.getBlock().getType())) {
-            return;
-        }
-
-        if (event.getBlock().getBlockData() instanceof Leaves) {
-            if (((Leaves) event.getBlock().getBlockData()).isPersistent()) {
-                return;
-            }
-        }
-        if (BlockTracker.isPlayerPlacedBlock(event.getBlock())) {
-            return;
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
-
-        //System.out.println(1);
-
         // checking in lower case for lazy admins
         if (plugin.disabledWorlds.contains(event.getBlock().getWorld().getName().toLowerCase())) {
             return;
         }
 
-        //System.out.println(2);
-
         if (!plugin.treeUtils.isPartOfTree(event.getBlock())) {
             return;
         }
 
-        //System.out.println(3);
-
         if (!plugin.treeUtils.isOnTreeGround(event.getBlock())) {
-            //System.out.println("No valid tree ground");
             return;
         }
 
         if(!event.getPlayer().hasPermission("lumberjack.use")) {
-            //System.out.println("No permission");
             return;
         }
-
-        //System.out.println(4);
 
         // Tree gravity does not work for player placed blocks
         if (plugin.getConfig().getBoolean("only-natural-logs") && BlockTracker.isPlayerPlacedBlock(event.getBlock())) {
             return;
         }
-
-        //System.out.println(5);
 
         // Dont show message when gravity is forced
         if ((!event.getPlayer().hasPermission("lumberjack.force") || event.getPlayer().hasPermission("lumberjack.force.ignore"))
@@ -110,8 +79,6 @@ public class BlockBreakListener implements Listener {
             }
         }
 
-        //System.out.println(6);
-
         // check if axe has to be used
         if (plugin.getConfig().getBoolean("must-use-axe")) {
             if (!MaterialSetTag.ITEMS_AXES.isTagged(event.getPlayer().getInventory().getItemInMainHand().getType())) {
@@ -123,16 +90,12 @@ public class BlockBreakListener implements Listener {
             }
         }
 
-        //System.out.println(7);
-
         // check if player must sneak
         if (plugin.getConfig().getBoolean("must-sneak")) {
             if (!event.getPlayer().isSneaking()) {
                 return;
             }
         }
-
-        //System.out.println(8);
 
         if(!MaterialSetTag.MANGROVE_LOGS.isTagged(event.getBlock().getType())) {
             // fix for torch bug part 2
@@ -141,21 +104,15 @@ public class BlockBreakListener implements Listener {
             }
         }
 
-        //System.out.println(9);
-
         if (!plugin.getPlayerSetting(event.getPlayer()).gravityEnabled
                 && event.getPlayer().hasPermission("lumberjack.force.ignore")) {
             return;
         }
 
-        //System.out.println(10);
-
         if (!plugin.getPlayerSetting(event.getPlayer()).gravityEnabled
                 && !event.getPlayer().hasPermission("lumberjack.force")) {
             return;
         }
-
-        //System.out.println(11);
 
         ArrayList<Block> logs;
 
