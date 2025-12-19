@@ -1,6 +1,5 @@
 package de.jeff_media.lumberjack.tasks;
 
-import com.jeff_media.jefflib.Ticks;
 import de.jeff_media.lumberjack.LumberJack;
 import de.jeff_media.lumberjack.utils.DecayUtils;
 import org.bukkit.Bukkit;
@@ -30,7 +29,7 @@ public class DecayTask extends BukkitRunnable {
                     if (DecayUtils.isLeaf(leaf)) {
                         Bukkit.getScheduler().runTask(plugin, () -> leaf.breakNaturally());
                     }
-                }, rand.nextInt((int) Ticks.fromSeconds(plugin.getConfig().getDouble("fast-leaves-decay-duration"))));
+                }, rand.nextInt((int) plugin.getConfig().getDouble("fast-leaves-decay-duration") * 20));
             }
         }
         plugin.decayTasks.remove(getTaskId());

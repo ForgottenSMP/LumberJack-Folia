@@ -1,7 +1,6 @@
 package de.jeff_media.lumberjack.listeners;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import com.jeff_media.jefflib.BlockTracker;
 import de.jeff_media.lumberjack.LumberJack;
 import de.jeff_media.lumberjack.NBTKeys;
 import de.jeff_media.lumberjack.data.AxeMaterial;
@@ -53,7 +52,8 @@ public class BlockBreakListener implements Listener {
         }
 
         // Tree gravity does not work for player placed blocks
-        if (plugin.getConfig().getBoolean("only-natural-logs") && BlockTracker.isPlayerPlacedBlock(event.getBlock())) {
+        if (plugin.getConfig().getBoolean("only-natural-logs")
+                && plugin.getBlockTracker().isPlayerPlacedBlock(event.getBlock())) {
             return;
         }
 

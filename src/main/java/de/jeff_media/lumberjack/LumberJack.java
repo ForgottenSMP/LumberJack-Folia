@@ -1,10 +1,6 @@
 package de.jeff_media.lumberjack;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import com.jeff_media.jefflib.BlockTracker;
-import com.jeff_media.jefflib.JeffLib;
-import com.jeff_media.jefflib.pluginhooks.PlaceholderAPIUtils;
-import com.jeff_media.morepersistentdatatypes.DataType;
 import de.jeff_media.lumberjack.commands.CommandLumberjack;
 import de.jeff_media.lumberjack.config.ConfigUpdater;
 import de.jeff_media.lumberjack.config.Messages;
@@ -13,12 +9,12 @@ import de.jeff_media.lumberjack.listeners.BlockBreakListener;
 import de.jeff_media.lumberjack.listeners.BlockPlaceListener;
 import de.jeff_media.lumberjack.listeners.DecayListener;
 import de.jeff_media.lumberjack.listeners.PlayerListener;
+import de.jeff_media.lumberjack.utils.BlockTracker;
 import de.jeff_media.lumberjack.utils.TreeUtils;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -35,6 +31,7 @@ import java.util.*;
 public class LumberJack extends JavaPlugin {
 
     private static LumberJack instance;
+    private final BlockTracker blockTracker = new BlockTracker(this);
     public final Vector fallingBlockOffset = new Vector(0.5, 0.0, 0.5);
     public final int maxTreeSize = 50;
     @SuppressWarnings("FieldCanBeLocal")
@@ -60,13 +57,6 @@ public class LumberJack extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        JeffLib.registerBlockTracker();
-
-        // %lumberjack_enabled%
-        PlaceholderAPIUtils.register("enabled", (player) -> {
-            if(!player.isOnline()) return "false";
-            return String.valueOf(getPlayerSetting(player.getPlayer()).gravityEnabled);
-        });
 
         createConfig();
 
@@ -85,6 +75,7 @@ public class LumberJack extends JavaPlugin {
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
         getServer().getPluginManager().registerEvents(playerListener, this);
         getServer().getPluginManager().registerEvents(decayListener, this);
+        getServer().getPluginManager().registerEvents(blockTracker, this);
 
         perPlayerSettings = new HashMap<>();
 
@@ -97,7 +88,7 @@ public class LumberJack extends JavaPlugin {
         Set<Material> trackedBlocks = new HashSet<>(MaterialSetTag.LOGS.getValues());
         trackedBlocks.removeAll(MaterialSetTag.MANGROVE_LOGS.getValues());
 
-        BlockTracker.addTrackedBlockTypes(trackedBlocks);
+        blockTracker.addTrackedBlockTypes(trackedBlocks);
     }
 
     private void showOldConfigWarning() {
@@ -124,7 +115,6 @@ public class LumberJack extends JavaPlugin {
         }
 
         getConfig().addDefault("gravity-enabled-by-default", false);
-        getConfig().addDefault("use-pdc",true);
         getConfig().addDefault("check-for-updates", "true");
         getConfig().addDefault("show-message-again-after-logout", true);
         getConfig().addDefault("attached-logs-fall-down", true);
@@ -170,17 +160,6 @@ public class LumberJack extends JavaPlugin {
                     p.getUniqueId() + ".yml");
             FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
 
-            if(getConfig().getBoolean("use-pdc")) {
-                //System.out.println("PDC enabled");
-                if(playerFile.exists()) {
-                    playerFile.delete();
-                }
-                if(p.getPersistentDataContainer().has(new NamespacedKey(this,NBTKeys.SETTINGS),DataType.FILE_CONFIGURATION)) {
-                    //System.out.println("Loaded PDC");
-                    playerConfig = p.getPersistentDataContainer().get(new NamespacedKey(this, NBTKeys.SETTINGS),DataType.FILE_CONFIGURATION);
-                }
-            }
-
             boolean activeForThisPlayer;
 
             if (!playerConfig.isSet("gravityEnabled")) {
@@ -206,14 +185,10 @@ public class LumberJack extends JavaPlugin {
             playerConfig.set("gravityEnabled", setting.gravityEnabled);
             playerConfig.set("hasSeenMessage", setting.hasSeenMessage);
 
-            if(getConfig().getBoolean("use-pdc")) {
-                p.getPersistentDataContainer().set(new NamespacedKey(this,NBTKeys.SETTINGS), DataType.FILE_CONFIGURATION,playerConfig);
-            } else {
-                try {
-                    playerConfig.save(playerFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                playerConfig.save(playerFile);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             perPlayerSettings.remove(p);
@@ -222,6 +197,10 @@ public class LumberJack extends JavaPlugin {
 
     public void reload() {
         reloadConfig();
+    }
+
+    public BlockTracker getBlockTracker() {
+        return blockTracker;
     }
 }
 	

@@ -1,6 +1,5 @@
 package de.jeff_media.lumberjack.commands;
 
-import com.jeff_media.jefflib.BlockTracker;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import de.jeff_media.lumberjack.LumberJack;
@@ -45,7 +44,7 @@ public class CommandLumberjack {
                     }
 
                     Block target = player.getTargetBlock(null, 20);
-                    player.sendPlainMessage(String.valueOf(BlockTracker.isPlayerPlacedBlock(target)));
+                    player.sendPlainMessage(String.valueOf(plugin.getBlockTracker().isPlayerPlacedBlock(target)));
 
                     return Command.SINGLE_SUCCESS;
                 }).build();
