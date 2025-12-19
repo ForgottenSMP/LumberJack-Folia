@@ -22,12 +22,9 @@ public class BlockPlaceListener implements Listener {
     // Prevent torches and stuff being placed inside a falling log
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent e) {
-
         if (!plugin.getConfig().getBoolean("prevent-torch-exploit")) {
             return;
         }
-
-        //System.out.println("possible conflicting block has been placed");
 
         for (Entity entity : e.getBlock().getLocation().getWorld().getNearbyEntities(e.getBlock().getLocation(), 1, 256, 1, entity -> entity instanceof FallingBlock)) {
 
@@ -46,12 +43,8 @@ public class BlockPlaceListener implements Listener {
                 continue;
             }
 
-            //if(plugin.treeUtils.isPartOfTree(fallingBlock.getBlockData().getMaterial())) {
             e.setCancelled(true);
             e.getPlayer().updateInventory();
-            //}
-
         }
     }
-
 }

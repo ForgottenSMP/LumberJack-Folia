@@ -106,7 +106,6 @@ public class LumberJack extends JavaPlugin {
             showOldConfigWarning();
             ConfigUpdater configUpdater = new ConfigUpdater(this);
             configUpdater.updateConfig();
-            //createConfig();
         }
 
         File playerDataFolder = new File(getDataFolder().getPath() + File.separator + "playerdata");

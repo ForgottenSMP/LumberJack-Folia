@@ -103,7 +103,6 @@ public class ConfigUpdater {
         try {
             fw = Files.newBufferedWriter(new File(main.getDataFolder().getAbsolutePath(), "config.yml").toPath(), StandardCharsets.UTF_8);
             for (String s : linesArray) {
-                //System.out.println("WRITING LINE: "+linesArray[i]);
                 fw.write(s + "\n");
             }
             fw.close();
@@ -111,9 +110,5 @@ public class ConfigUpdater {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        // Utils.renameFileInPluginDir(plugin, "config.yml.default", "config.yml");
-
     }
-
 }

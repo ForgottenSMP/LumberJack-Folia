@@ -131,7 +131,6 @@ public class TreeUtils {
         for (BlockFace face : faces) {
             if (above.getRelative(face).getType() == mat) blocks.add(above.getRelative(face));
         }
-        //blocks.forEach((b) -> System.out.println("  "+b.getType()+"@"+b.getLocation()));
 
         return blocks;
     }
@@ -140,8 +139,6 @@ public class TreeUtils {
         if (!matchesTrunkType(mat, block.getType())) return;
         if (!list.contains(block)) {
             list.add(block);
-            //System.out.println("adding "+block.getType().name()+"@"+block.getLocation());
-
             for (Block next : getAdjacent(block)) {
                 getTreeTrunk2(next, list, mat);
             }
@@ -175,9 +172,7 @@ public class TreeUtils {
         if(validGroundTypes == null) return false;
 
         for (Material mat : validGroundTypes) {
-            //System.out.println("Checking whether " + mat + " == " + currentBlock.getType());
             if (mat == currentBlock.getType()) {
-                //System.out.println("YES");
                 return true;
             }
         }
