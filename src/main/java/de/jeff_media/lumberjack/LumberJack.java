@@ -11,13 +11,20 @@ import de.jeff_media.lumberjack.listeners.DecayListener;
 import de.jeff_media.lumberjack.listeners.PlayerListener;
 import de.jeff_media.lumberjack.utils.BlockTracker;
 import de.jeff_media.lumberjack.utils.TreeUtils;
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -28,7 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class LumberJack extends JavaPlugin {
+public class LumberJack extends JavaPlugin implements Listener {
 
     private static LumberJack instance;
     private final BlockTracker blockTracker = new BlockTracker(this);
@@ -40,6 +47,7 @@ public class LumberJack extends JavaPlugin {
     public Messages messages;
     public ArrayList<String> disabledWorlds;
     boolean gravityEnabledByDefault = false;
+    public Enchantment requiredEnchantment;
     HashMap<Player, PlayerSetting> perPlayerSettings;
     boolean debug = false;
 	public final Set<Integer> decayTasks = new HashSet<>();
@@ -72,6 +80,7 @@ public class LumberJack extends JavaPlugin {
         manager.registerEventHandler(LifecycleEvents.COMMANDS, event ->
                 new CommandLumberjack(this, event.registrar()));
 
+        getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(blockBreakListener, this);
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
         getServer().getPluginManager().registerEvents(playerListener, this);
@@ -129,6 +138,19 @@ public class LumberJack extends JavaPlugin {
         disabledWorlds = (ArrayList<String>) getConfig().getStringList("disabled-worlds");
         gravityEnabledByDefault = getConfig().getBoolean("gravity-enabled-by-default");
 
+        findEnchantment();
+    }
+
+    private void findEnchantment() {
+        NamespacedKey enchantmentKey = NamespacedKey.fromString(getConfig().getString("requires-enchantment", ""));
+
+        if (enchantmentKey != null) {
+            requiredEnchantment = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(enchantmentKey);
+
+            if (requiredEnchantment == null) {
+                getSLF4JLogger().warn("Required enchantment {} does not exist", enchantmentKey);
+            }
+        }
     }
 
     public PlayerSetting getPlayerSetting(Player p) {
@@ -146,6 +168,11 @@ public class LumberJack extends JavaPlugin {
                 task.cancel();
             }
         }
+    }
+
+    @EventHandler
+    public void onReload(ServerResourcesReloadedEvent e) {
+        findEnchantment();
     }
 
     public void togglePlayerSetting(Player p) {

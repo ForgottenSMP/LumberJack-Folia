@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
@@ -81,12 +82,23 @@ public class BlockBreakListener implements Listener {
 
         // check if axe has to be used
         if (plugin.getConfig().getBoolean("must-use-axe")) {
-            if (!MaterialSetTag.ITEMS_AXES.isTagged(event.getPlayer().getInventory().getItemInMainHand().getType())) {
+            ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+
+            if (!MaterialSetTag.ITEMS_AXES.isTagged(item.getType())) {
                 return;
             }
+
+            // Check axe level
             AxeMaterial requiredAxe = AxeMaterial.get(plugin.getConfig().getString("requires-at-least"));
-            if (!AxeMaterial.isAtLeast(event.getPlayer().getInventory().getItemInMainHand().getType(), requiredAxe)) {
+            if (!AxeMaterial.isAtLeast(item.getType(), requiredAxe)) {
                 return;
+            }
+
+            // Check enchantment
+            if (plugin.requiredEnchantment != null) {
+                if (!item.getEnchantments().containsKey(plugin.requiredEnchantment)) {
+                    return;
+                }
             }
         }
 

@@ -29,6 +29,10 @@ must-use-axe: true
 # WOOD, it works with all axes.
 requires-at-least: WOOD
 
+# When set, players have to use an axe with the given enchantment
+# for tree gravity.
+requires-enchantment: ''
+
 # When enabled, tree gravity will only work when the
 # player is sneaking
 must-sneak: false
