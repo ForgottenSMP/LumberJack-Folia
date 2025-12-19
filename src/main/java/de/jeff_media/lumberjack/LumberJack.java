@@ -59,6 +59,7 @@ public class LumberJack extends JavaPlugin {
         instance = this;
 
         createConfig();
+        loadConfig();
 
         messages = new Messages(this);
         treeUtils = new TreeUtils(this);
@@ -78,8 +79,6 @@ public class LumberJack extends JavaPlugin {
         getServer().getPluginManager().registerEvents(blockTracker, this);
 
         perPlayerSettings = new HashMap<>();
-
-        gravityEnabledByDefault = getConfig().getBoolean("gravity-enabled-by-default");
 
         trackBlocks();
     }
@@ -123,9 +122,12 @@ public class LumberJack extends JavaPlugin {
         getConfig().addDefault("fast-leaves-decay", false);
         getConfig().addDefault("fast-leaves-decay-duration", 10);
         getConfig().addDefault("only-natural-logs", true);
+    }
 
+    private void loadConfig() {
         // Load disabled-worlds. If it does not exist in the config, it returns null. That's no problem
         disabledWorlds = (ArrayList<String>) getConfig().getStringList("disabled-worlds");
+        gravityEnabledByDefault = getConfig().getBoolean("gravity-enabled-by-default");
 
     }
 
@@ -196,6 +198,7 @@ public class LumberJack extends JavaPlugin {
 
     public void reload() {
         reloadConfig();
+        loadConfig();
     }
 
     public BlockTracker getBlockTracker() {
