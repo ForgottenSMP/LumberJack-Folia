@@ -1,7 +1,7 @@
 main: de.jeff_media.lumberjack.LumberJack
 name: LumberJack
 version: ${project.version}
-api-version: "1.21.10"
+api-version: "1.21.11"
 description: Better tree felling - tree gravity & fast leaves decay
 author: mfnalex
 prefix: LumberJack
