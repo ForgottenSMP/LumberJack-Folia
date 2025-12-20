@@ -49,16 +49,13 @@ public class CommandLumberjack {
                     return Command.SINGLE_SUCCESS;
                 }).build();
 
-        commands.register(literal("lumberjack").executes(c -> {
+        commands.register(literal("lumberjack")
+                                  .requires(s -> s.getSender().hasPermission("lumberjack.use"))
+                                  .executes(c -> {
             CommandSender sender = c.getSource().getSender();
 
             if (!(sender instanceof Player player)) {
                 sender.sendPlainMessage("You must be a in-game to run this command.");
-                return Command.SINGLE_SUCCESS;
-            }
-
-            if (!player.hasPermission("lumberjack.use")) {
-                player.sendMessage(Bukkit.permissionMessage());
                 return Command.SINGLE_SUCCESS;
             }
 

@@ -11,9 +11,16 @@ website: https://www.mfnalex.de/
 permissions:
   lumberjack.use:
     description: Allows usage of the command /lumberjack
+    default: true
   lumberjack.force:
     description: Forces tree gravity to be enabled for this player
     default: false
   lumberjack.force.ignore:
     description: Ignores lumberjack.force permission. This permission exists so that players with a wildcard permission can still use the command /lumberjack
     default: false
+  lumberjack.debug:
+    description: Allows usage of the command /lumberjack debug
+    default: op
+  lumberjack.reload:
+    description: Allows usage of the command /lumberjack reload
+    default: op
