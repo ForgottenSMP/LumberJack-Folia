@@ -1,10 +1,10 @@
 package de.jeff_media.lumberjack;
 
 import com.destroystokyo.paper.MaterialSetTag;
-import de.jeff_media.lumberjack.commands.CommandLumberjack;
 import de.jeff_media.lumberjack.config.ConfigUpdater;
 import de.jeff_media.lumberjack.config.Messages;
 import de.jeff_media.lumberjack.data.PlayerSetting;
+import de.jeff_media.lumberjack.commands.CommandLumberjack;
 import de.jeff_media.lumberjack.listeners.BlockBreakListener;
 import de.jeff_media.lumberjack.listeners.BlockPlaceListener;
 import de.jeff_media.lumberjack.listeners.DecayListener;
@@ -12,8 +12,6 @@ import de.jeff_media.lumberjack.listeners.PlayerListener;
 import de.jeff_media.lumberjack.utils.BlockTracker;
 import de.jeff_media.lumberjack.utils.TreeUtils;
 import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
@@ -25,15 +23,16 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LumberJack extends JavaPlugin implements Listener {
 
@@ -48,9 +47,9 @@ public class LumberJack extends JavaPlugin implements Listener {
     public ArrayList<String> disabledWorlds;
     boolean gravityEnabledByDefault = false;
     public Enchantment requiredEnchantment;
-    HashMap<Player, PlayerSetting> perPlayerSettings;
+    ConcurrentMap<Player, PlayerSetting> perPlayerSettings;
     boolean debug = false;
-	public final Set<Integer> decayTasks = new HashSet<>();
+    private final AtomicInteger decayTaskCount = new AtomicInteger();
 
     public HashSet<BukkitTask> getScheduledTasks() {
         return scheduledTasks;
@@ -76,9 +75,8 @@ public class LumberJack extends JavaPlugin implements Listener {
         DecayListener decayListener = new DecayListener();
         PlayerListener playerListener = new PlayerListener(this);
 
-        LifecycleEventManager<@NotNull Plugin> manager = getLifecycleManager();
-        manager.registerEventHandler(LifecycleEvents.COMMANDS, event ->
-                new CommandLumberjack(this, event.registrar()));
+        Objects.requireNonNull(getCommand("lumberjack"), "lumberjack command missing from plugin.yml")
+                .setExecutor(new CommandLumberjack(this));
 
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(blockBreakListener, this);
@@ -87,7 +85,7 @@ public class LumberJack extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(decayListener, this);
         getServer().getPluginManager().registerEvents(blockTracker, this);
 
-        perPlayerSettings = new HashMap<>();
+        perPlayerSettings = new ConcurrentHashMap<>();
 
         trackBlocks();
     }
@@ -182,10 +180,9 @@ public class LumberJack extends JavaPlugin implements Listener {
     }
 
     public void registerPlayer(Player p) {
-        if (!perPlayerSettings.containsKey(p)) {
-
+        perPlayerSettings.computeIfAbsent(p, player -> {
             File playerFile = new File(getDataFolder() + File.separator + "playerdata",
-                    p.getUniqueId() + ".yml");
+                    player.getUniqueId() + ".yml");
             FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
 
             boolean activeForThisPlayer;
@@ -200,13 +197,13 @@ public class LumberJack extends JavaPlugin implements Listener {
             if (!getConfig().getBoolean("show-message-again-after-logout")) {
                 newSettings.hasSeenMessage = playerConfig.getBoolean("hasSeenMessage");
             }
-            perPlayerSettings.put(p, newSettings);
-        }
+            return newSettings;
+        });
     }
 
     public void unregisterPlayer(Player p) {
-        if (perPlayerSettings.containsKey(p)) {
-            PlayerSetting setting = getPlayerSetting(p);
+        PlayerSetting setting = perPlayerSettings.remove(p);
+        if (setting != null) {
             File playerFile = new File(getDataFolder() + File.separator + "playerdata",
                     p.getUniqueId() + ".yml");
             YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
@@ -218,8 +215,6 @@ public class LumberJack extends JavaPlugin implements Listener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            perPlayerSettings.remove(p);
         }
     }
 
@@ -231,6 +226,22 @@ public class LumberJack extends JavaPlugin implements Listener {
     public BlockTracker getBlockTracker() {
         return blockTracker;
     }
+
+    public boolean tryStartDecayTask() {
+        int maxTasks = getConfig().getInt("max-decay-tasks", 1000);
+        while (true) {
+            int current = decayTaskCount.get();
+            if (current >= maxTasks) {
+                return false;
+            }
+            if (decayTaskCount.compareAndSet(current, current + 1)) {
+                return true;
+            }
+        }
+    }
+
+    public void finishDecayTask() {
+        decayTaskCount.updateAndGet(current -> Math.max(0, current - 1));
+    }
 }
 	
-

@@ -2,11 +2,18 @@ main: de.jeff_media.lumberjack.LumberJack
 name: LumberJack
 version: ${project.version}
 api-version: "1.21.11"
+folia-supported: true
 description: Better tree felling - tree gravity & fast leaves decay
 author: mfnalex
 prefix: LumberJack
 database: false
 website: https://www.mfnalex.de/
+
+commands:
+  lumberjack:
+    description: Toggle gravity for tree trunks
+    aliases: [tg, treegravity, gravity]
+    usage: /<command> [reload|debug]
 
 permissions:
   lumberjack.use:

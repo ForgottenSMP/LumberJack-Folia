@@ -64,9 +64,9 @@ public final class BlockTracker implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBreak(final BlockBreakEvent event) {
-		if (isPlayerPlacedBlock(event.getBlock())) {
-			plugin.getServer().getScheduler().runTaskLater(
-					plugin, () -> setPlayerPlacedBlock(event.getBlock(), false), 1L);
+		final Block block = event.getBlock();
+		if (isPlayerPlacedBlock(block)) {
+			FoliaScheduler.runAtBlockLater(plugin, block, 1L, () -> setPlayerPlacedBlock(block, false));
 		}
 	}
 
@@ -84,11 +84,11 @@ public final class BlockTracker implements Listener {
         if(isPlayerPlacedBlock(event.getBlock())) return;
 
         final Block placedBlock = event.getBlock();
-        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+        FoliaScheduler.runAtBlockLater(plugin, placedBlock, 1L, () -> {
             if(placedBlock.getType().name().startsWith("STRIPPED_")) {
                 setPlayerPlacedBlock(placedBlock, false);
             }
-        },1L);
+        });
     }
 
     /**

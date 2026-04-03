@@ -24,6 +24,9 @@ public class DecayUtils {
         for (int x = blockX - RADIUS; x <= blockX + RADIUS; x++) {
             for (int y = blockY - RADIUS; y <= blockY + RADIUS; y++) {
                 for (int z = blockZ - RADIUS; z <= blockZ + RADIUS; z++) {
+                    if (!FoliaCompat.isOwnedByCurrentRegion(world, x, y, z)) {
+                        continue;
+                    }
                     Block candidate = world.getBlockAt(x, y, z);
                     if(candidate == originalLeaf.getBlock()) continue;
                     if (candidate.getType().isAir()) continue;
