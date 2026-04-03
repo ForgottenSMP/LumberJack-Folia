@@ -1,44 +1,36 @@
 package de.jeff_media.lumberjack.tasks;
 
-import com.jeff_media.jefflib.Ticks;
 import de.jeff_media.lumberjack.LumberJack;
 import de.jeff_media.lumberjack.utils.DecayUtils;
-import org.bukkit.Bukkit;
+import de.jeff_media.lumberjack.utils.FoliaScheduler;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
 import java.util.Random;
 
-public class DecayTask extends BukkitRunnable {
+public class DecayTask {
 
     private static final LumberJack plugin = LumberJack.getInstance();
     private static final Random rand = new Random();
-    private final BlockState leaf;
     private final Collection<Block> leaves;
 
     public DecayTask(BlockState leaf) {
-        this.leaf = leaf;
         this.leaves = DecayUtils.getLeaves(leaf);
     }
 
-    @Override
-    public void run() {
-
-        if (!isCancelled()) {
+    public void schedule() {
+        try {
+            int maxDelay = Math.max(1, (int) Math.round(plugin.getConfig().getDouble("fast-leaves-decay-duration") * 20D));
             for (Block leaf : leaves) {
-                if (isCancelled()) return;
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+                FoliaScheduler.runAtBlockLater(plugin, leaf, rand.nextInt(maxDelay), () -> {
                     if (DecayUtils.isLeaf(leaf)) {
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            plugin.getCustomDropManager().doCustomDrops(leaf.getLocation(), leaf.getType());
-                            leaf.breakNaturally();
-                        });
+                        leaf.breakNaturally();
                     }
-                }, rand.nextInt((int) Ticks.fromSeconds(plugin.getConfig().getDouble("fast-leaves-decay-duration"))));
+                });
             }
+        } finally {
+            plugin.finishDecayTask();
         }
-        plugin.decayTasks.remove(getTaskId());
     }
 }

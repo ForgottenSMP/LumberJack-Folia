@@ -13,11 +13,8 @@ public class DecayListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onLeafDecay(LeavesDecayEvent event) {
         if (!plugin.getConfig().getBoolean("fast-leaves-decay")) return;
-        plugin.getCustomDropManager().doCustomDrops(event.getBlock().getLocation(), event.getBlock().getType());
-        if(plugin.decayTasks.size()<plugin.getConfig().getInt("max-decay-tasks",1000)) {
-            plugin.decayTasks.add(new DecayTask(event.getBlock().getState()).runTaskAsynchronously(plugin).getTaskId());
+        if (plugin.tryStartDecayTask()) {
+            new DecayTask(event.getBlock().getState()).schedule();
         }
     }
-
-
 }

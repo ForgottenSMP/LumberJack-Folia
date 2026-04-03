@@ -8,7 +8,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -56,12 +55,13 @@ public class ConfigUpdater {
         try {
 
             Scanner scanner = new Scanner(
-                    new File(main.getDataFolder().getAbsolutePath() + File.separator + "config.yml"), "UTF-8");
+					new File(main.getDataFolder().getAbsolutePath() + File.separator + "config.yml"),
+					StandardCharsets.UTF_8);
             while (scanner.hasNextLine()) {
-                linesInDefaultConfig.add(scanner.nextLine() + "");
+                linesInDefaultConfig.add(scanner.nextLine());
             }
             scanner.close();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -103,7 +103,6 @@ public class ConfigUpdater {
         try {
             fw = Files.newBufferedWriter(new File(main.getDataFolder().getAbsolutePath(), "config.yml").toPath(), StandardCharsets.UTF_8);
             for (String s : linesArray) {
-                //System.out.println("WRITING LINE: "+linesArray[i]);
                 fw.write(s + "\n");
             }
             fw.close();
@@ -111,9 +110,5 @@ public class ConfigUpdater {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        // Utils.renameFileInPluginDir(plugin, "config.yml.default", "config.yml");
-
     }
-
 }

@@ -1,6 +1,6 @@
 main: de.jeff_media.lumberjack.LumberJack
 name: LumberJack
-version: ${project.version}
+version: 5.4.0
 api-version: "1.21.11"
 folia-supported: true
 description: Better tree felling - tree gravity & fast leaves decay

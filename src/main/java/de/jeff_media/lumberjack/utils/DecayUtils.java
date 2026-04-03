@@ -14,20 +14,6 @@ public class DecayUtils {
 
     private static final int MAX_DISTANCE = 6;
     private static final int RADIUS = 5;
-    private static final boolean IS_AT_LEAST_v1_17;
-    private static Boolean tagsAvailable = null;
-
-    static {
-        boolean azaleaLeavesAvailable = false;
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            Material.FLOWERING_AZALEA_LEAVES.getData();
-            azaleaLeavesAvailable = true;
-        } catch (Throwable ignored) {
-
-        }
-        IS_AT_LEAST_v1_17 = azaleaLeavesAvailable;
-    }
 
     public static Collection<Block> getLeaves(BlockState originalLeaf) {
         Collection<Block> blocks = new HashSet<>();
@@ -38,9 +24,11 @@ public class DecayUtils {
         for (int x = blockX - RADIUS; x <= blockX + RADIUS; x++) {
             for (int y = blockY - RADIUS; y <= blockY + RADIUS; y++) {
                 for (int z = blockZ - RADIUS; z <= blockZ + RADIUS; z++) {
+                    if (!FoliaCompat.isOwnedByCurrentRegion(world, x, y, z)) {
+                        continue;
+                    }
                     Block candidate = world.getBlockAt(x, y, z);
                     if(candidate == originalLeaf.getBlock()) continue;
-                    if(candidate==null) continue;
                     if (candidate.getType().isAir()) continue;
                     if (!isLeaf(candidate)) {
                         continue;
@@ -67,34 +55,14 @@ public class DecayUtils {
     }
 
     private static boolean isLeaf(Material material) {
-        if (tagsAvailable == null) {
-            try {
-                Tag.LEAVES.isTagged(material);
-                tagsAvailable = true;
-            } catch (Throwable t) {
-                tagsAvailable = false;
-            }
-        }
-
-        if (tagsAvailable) {
-            return Tag.LEAVES.isTagged(material);
-        } else {
-            return material.name().endsWith("_LEAVES");
-        }
-
+        return Tag.LEAVES.isTagged(material);
     }
 
     private static boolean isMatchingLeaf(Material leaf1, Material leaf2) {
-        if (IS_AT_LEAST_v1_17) {
-            switch (leaf1) {
-                case AZALEA_LEAVES:
-                case FLOWERING_AZALEA_LEAVES:
-                    return leaf2 == Material.AZALEA_LEAVES || leaf2 == Material.FLOWERING_AZALEA_LEAVES;
-                default:
-                    return leaf1 == leaf2;
-            }
-        }
-        return leaf1 == leaf2;
+		return switch (leaf1) {
+			case AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES ->
+					leaf2 == Material.AZALEA_LEAVES || leaf2 == Material.FLOWERING_AZALEA_LEAVES;
+			default -> leaf1 == leaf2;
+		};
     }
-
 }

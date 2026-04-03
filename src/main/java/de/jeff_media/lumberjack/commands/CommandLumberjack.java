@@ -1,8 +1,8 @@
 package de.jeff_media.lumberjack.commands;
 
-import com.jeff_media.jefflib.BlockTracker;
 import de.jeff_media.lumberjack.LumberJack;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,60 +10,78 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class CommandLumberjack implements CommandExecutor {
 
-    final LumberJack plugin;
+    private final LumberJack plugin;
 
     public CommandLumberjack(LumberJack plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String alias, String[] args) {
-
-
-        if (!command.getName().equalsIgnoreCase("lumberjack")) {
-            return false;
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (args.length == 0) {
+            return toggle(sender);
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("reload") && sender.hasPermission("lumberjack.reload")) {
-            plugin.reload();
-            sender.sendMessage(ChatColor.GREEN + "LumberJack has been reloaded.");
-            return true;
-        }
-
-        if (args.length > 0 && args[0].equalsIgnoreCase("debug") && sender.hasPermission("lumberjack.debug")) {
-            Player player = (Player) sender;
-            Block target = player.getTargetBlock(null, 20);
-            player.sendMessage(String.valueOf(BlockTracker.isPlayerPlacedBlock(target)));
-            return true;
-        }
-
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("You must be a player to run this command.");
-            return true;
-        }
-        Player p = (Player) sender;
-        if (!sender.hasPermission("lumberjack.use")) {
-            sender.sendMessage(Objects.requireNonNull(Objects.requireNonNull(plugin.getCommand("lumberjack")).getPermissionMessage()));
-            return true;
-        }
-
-        if (sender.hasPermission("lumberjack.force") && !sender.hasPermission("lumberjack.force.ignore")) {
-            sender.sendMessage(plugin.messages.MSG_CAN_NOT_DISABLE);
-            return true;
-        }
-
-        plugin.togglePlayerSetting(p);
-        if (plugin.getPlayerSetting(p).gravityEnabled) {
-            sender.sendMessage(plugin.messages.MSG_ACTIVATED);
-        } else {
-            sender.sendMessage(plugin.messages.MSG_DEACTIVATED);
-        }
-        return true;
-
+        return switch (args[0].toLowerCase()) {
+            case "reload" -> reload(sender);
+            case "debug" -> debug(sender);
+            default -> false;
+        };
     }
 
+    private boolean toggle(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendPlainMessage("You must be a in-game to run this command.");
+            return true;
+        }
+
+        if (!player.hasPermission("lumberjack.use")) {
+            sender.sendPlainMessage("You do not have permission to use this command.");
+            return true;
+        }
+
+        if (player.hasPermission("lumberjack.force") && !player.hasPermission("lumberjack.force.ignore")) {
+            player.sendRichMessage(plugin.messages.MSG_CAN_NOT_DISABLE);
+            return true;
+        }
+
+        plugin.togglePlayerSetting(player);
+
+        if (plugin.getPlayerSetting(player).gravityEnabled) {
+            sender.sendRichMessage(plugin.messages.MSG_ACTIVATED);
+        } else {
+            sender.sendRichMessage(plugin.messages.MSG_DEACTIVATED);
+        }
+
+        return true;
+    }
+
+    private boolean reload(CommandSender sender) {
+        if (!sender.hasPermission("lumberjack.reload")) {
+            sender.sendPlainMessage("You do not have permission to use this command.");
+            return true;
+        }
+
+        plugin.reload();
+        sender.sendMessage(Component.text("LumberJack has been reloaded.").color(NamedTextColor.GREEN));
+        return true;
+    }
+
+    private boolean debug(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendPlainMessage("You must be a in-game to run this command.");
+            return true;
+        }
+
+        if (!sender.hasPermission("lumberjack.debug")) {
+            sender.sendPlainMessage("You do not have permission to use this command.");
+            return true;
+        }
+
+        Block target = player.getTargetBlock(null, 20);
+        player.sendPlainMessage(String.valueOf(plugin.getBlockTracker().isPlayerPlacedBlock(target)));
+        return true;
+    }
 }

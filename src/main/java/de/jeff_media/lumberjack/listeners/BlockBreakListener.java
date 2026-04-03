@@ -1,23 +1,23 @@
 package de.jeff_media.lumberjack.listeners;
 
-import com.jeff_media.jefflib.BlockTracker;
-import com.jeff_media.jefflib.NBTAPI;
+import com.destroystokyo.paper.MaterialSetTag;
 import de.jeff_media.lumberjack.LumberJack;
 import de.jeff_media.lumberjack.NBTKeys;
-import de.jeff_media.lumberjack.NBTValues;
 import de.jeff_media.lumberjack.data.AxeMaterial;
 import de.jeff_media.lumberjack.utils.TreeUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,65 +26,37 @@ import java.util.Comparator;
 public class BlockBreakListener implements Listener {
 
     final LumberJack plugin;
+    final NamespacedKey fallingLogKey;
 
     public BlockBreakListener(LumberJack plugin) {
         this.plugin = plugin;
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onLeavesBreak(BlockBreakEvent event) {
-
-        if (!(event.getBlock().getBlockData() instanceof Leaves) && !event.getBlock().getType().name().endsWith("_WART_BLOCK")) {
-            return;
-        }
-
-        if (event.getBlock().getBlockData() instanceof Leaves) {
-            if (((Leaves) event.getBlock().getBlockData()).isPersistent()) {
-                return;
-            }
-        }
-        if (BlockTracker.isPlayerPlacedBlock(event.getBlock())) {
-            return;
-        }
-        plugin.getCustomDropManager().doCustomDrops(event.getBlock().getLocation(), event.getBlock().getType());
+        this.fallingLogKey = new NamespacedKey(plugin, NBTKeys.IS_FALLING_LOG);
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
-
-        //System.out.println(1);
-
         // checking in lower case for lazy admins
         if (plugin.disabledWorlds.contains(event.getBlock().getWorld().getName().toLowerCase())) {
             return;
         }
 
-        //System.out.println(2);
-
         if (!plugin.treeUtils.isPartOfTree(event.getBlock())) {
             return;
         }
 
-        //System.out.println(3);
-
         if (!plugin.treeUtils.isOnTreeGround(event.getBlock())) {
-            //System.out.println("No valid tree ground");
             return;
         }
 
         if(!event.getPlayer().hasPermission("lumberjack.use")) {
-            //System.out.println("No permission");
             return;
         }
-
-        //System.out.println(4);
 
         // Tree gravity does not work for player placed blocks
-        if (plugin.getConfig().getBoolean("only-natural-logs") && BlockTracker.isPlayerPlacedBlock(event.getBlock())) {
+        if (plugin.getConfig().getBoolean("only-natural-logs")
+                && plugin.getBlockTracker().isPlayerPlacedBlock(event.getBlock())) {
             return;
         }
-
-        //System.out.println(5);
 
         // Dont show message when gravity is forced
         if ((!event.getPlayer().hasPermission("lumberjack.force") || event.getPlayer().hasPermission("lumberjack.force.ignore"))
@@ -94,7 +66,7 @@ public class BlockBreakListener implements Listener {
                 if (!plugin.getPlayerSetting(p).hasSeenMessage) {
                     plugin.getPlayerSetting(p).hasSeenMessage = true;
                     if (plugin.getConfig().getBoolean("show-message-when-breaking-log")) {
-                        p.sendMessage(plugin.messages.MSG_COMMANDMESSAGE);
+                        p.sendRichMessage(plugin.messages.MSG_COMMANDMESSAGE);
                     }
                 }
                 return;
@@ -102,26 +74,33 @@ public class BlockBreakListener implements Listener {
                 if (!plugin.getPlayerSetting(p).hasSeenMessage) {
                     plugin.getPlayerSetting(p).hasSeenMessage = true;
                     if (plugin.getConfig().getBoolean("show-message-when-breaking-log-and-gravity-is-enabled")) {
-                        p.sendMessage(plugin.messages.MSG_COMMANDMESSAGE2);
+                        p.sendRichMessage(plugin.messages.MSG_COMMANDMESSAGE2);
                     }
                 }
             }
         }
 
-        //System.out.println(6);
-
         // check if axe has to be used
         if (plugin.getConfig().getBoolean("must-use-axe")) {
-            if (!event.getPlayer().getInventory().getItemInMainHand().getType().name().toUpperCase().endsWith("_AXE")) {
+            ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+
+            if (!MaterialSetTag.ITEMS_AXES.isTagged(item.getType())) {
                 return;
             }
+
+            // Check axe level
             AxeMaterial requiredAxe = AxeMaterial.get(plugin.getConfig().getString("requires-at-least"));
-            if (!AxeMaterial.isAtLeast(event.getPlayer().getInventory().getItemInMainHand().getType(), requiredAxe)) {
+            if (!AxeMaterial.isAtLeast(item.getType(), requiredAxe)) {
                 return;
+            }
+
+            // Check enchantment
+            if (plugin.requiredEnchantment != null) {
+                if (!item.getEnchantments().containsKey(plugin.requiredEnchantment)) {
+                    return;
+                }
             }
         }
-
-        //System.out.println(7);
 
         // check if player must sneak
         if (plugin.getConfig().getBoolean("must-sneak")) {
@@ -130,30 +109,22 @@ public class BlockBreakListener implements Listener {
             }
         }
 
-        //System.out.println(8);
-
-        if(!event.getBlock().getType().name().contains("MANGROVE")) {
+        if(!MaterialSetTag.MANGROVE_LOGS.isTagged(event.getBlock().getType())) {
             // fix for torch bug part 2
             if (plugin.getConfig().getBoolean("prevent-torch-exploit") && !TreeUtils.isAboveNonSolidBlock(event.getBlock())) {
                 return;
             }
         }
 
-        //System.out.println(9);
-
         if (!plugin.getPlayerSetting(event.getPlayer()).gravityEnabled
                 && event.getPlayer().hasPermission("lumberjack.force.ignore")) {
             return;
         }
 
-        //System.out.println(10);
-
         if (!plugin.getPlayerSetting(event.getPlayer()).gravityEnabled
                 && !event.getPlayer().hasPermission("lumberjack.force")) {
             return;
         }
-
-        //System.out.println(11);
 
         ArrayList<Block> logs;
 
@@ -186,9 +157,10 @@ public class BlockBreakListener implements Listener {
                 BlockData blockData = logAbove.getBlockData().clone();
                 logAbove.setType(Material.AIR);
                 FallingBlock fallingBlock = logAbove.getLocation().getWorld()
-                        .spawnFallingBlock(logAbove.getLocation().add(plugin.fallingBlockOffset), blockData);
+                        .spawn(logAbove.getLocation().add(plugin.fallingBlockOffset), FallingBlock.class,
+                               e -> e.setBlockData(blockData));
                 if (plugin.getConfig().getBoolean("prevent-torch-exploit")) {
-                    NBTAPI.addNBT(fallingBlock, NBTKeys.IS_FALLING_LOG, NBTValues.TRUE);
+                    fallingBlock.getPersistentDataContainer().set(fallingLogKey, PersistentDataType.BOOLEAN, true);
                 }
                 if (plugin.getConfig().getBoolean("prevent-torch-exploit-aggressive")) {
                     fallingBlock.setDropItem(false);

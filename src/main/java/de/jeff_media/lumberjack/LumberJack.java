@@ -1,34 +1,28 @@
 package de.jeff_media.lumberjack;
 
-import com.google.common.base.Enums;
-import com.jeff_media.jefflib.BlockTracker;
-import com.jeff_media.jefflib.JeffLib;
-import com.jeff_media.jefflib.data.McVersion;
-import com.jeff_media.jefflib.pluginhooks.PlaceholderAPIUtils;
-import com.jeff_media.morepersistentdatatypes.DataType;
-import de.jeff_media.lumberjack.commands.CommandLumberjack;
+import com.destroystokyo.paper.MaterialSetTag;
 import de.jeff_media.lumberjack.config.ConfigUpdater;
 import de.jeff_media.lumberjack.config.Messages;
 import de.jeff_media.lumberjack.data.PlayerSetting;
-import de.jeff_media.lumberjack.hooks.FarmLimiterListener;
+import de.jeff_media.lumberjack.commands.CommandLumberjack;
 import de.jeff_media.lumberjack.listeners.BlockBreakListener;
 import de.jeff_media.lumberjack.listeners.BlockPlaceListener;
 import de.jeff_media.lumberjack.listeners.DecayListener;
 import de.jeff_media.lumberjack.listeners.PlayerListener;
+import de.jeff_media.lumberjack.utils.BlockTracker;
 import de.jeff_media.lumberjack.utils.TreeUtils;
-import de.jeff_media.updatechecker.UpdateChecker;
-import de.jeff_media.updatechecker.UserAgentBuilder;
-import org.bstats.bukkit.Metrics;
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventPriority;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -36,25 +30,14 @@ import org.bukkit.util.Vector;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
+public class LumberJack extends JavaPlugin implements Listener {
 
-public class LumberJack extends JavaPlugin {
-
-    //static final String[] woodTypes = {"acacia", "birch", "jungle", "oak", "dark_oak", "spruce"};
-    static final String[] treeBlocks = {
-            "ACACIA_LOG", "STRIPPED_ACACIA_LOG", "ACACIA_WOOD", "STRIPPED_ACACIA_WOOD",
-            "BIRCH_LOG", "STRIPPED_BIRCH_LOG", "BIRCH_WOOD", "STRIPPED_BIRCH_WOOD",
-            "DARK_OAK_LOG", "STRIPPED_DARK_OAK_LOG", "DARK_OAK_WOOD", "STRIPPED_DARK_OAK_WOOD",
-            "JUNGLE_LOG", "STRIPPED_JUNGLE_LOG", "JUNGLE_WOOD", "STRIPPED_JUNGLE_WOOD",
-            "OAK_LOG", "STRIPPED_OAK_LOG", "OAK_WOOD", "STRIPPED_OAK_WOOD",
-            "SPRUCE_LOG", "STRIPPED_SPRUCE_LOG", "SPRUCE_WOOD", "STRIPPED_SPRUCE_WOOD",
-            "WARPED_STEM", "STRIPPED_WARPED_STEM", "WARPED_HYPHAE", "STRIPPED_WARPED_HYPHAE",
-            "CRIMSON_STEM", "STRIPPED_CRIMSON_STEM", "CRIMSON_HYPHAE", "STRIPPED_CRIMSON_HYPHAE",
-            "CHERRY_LOG", "STRIPPED_CHERRY_LOG", "CHERRY_WOOD", "STRIPPED_CHERRY_WOOD"
-    };
-    private static final int SPIGOT_RESOURCE_ID = 60306;
     private static LumberJack instance;
+    private final BlockTracker blockTracker = new BlockTracker(this);
     public final Vector fallingBlockOffset = new Vector(0.5, 0.0, 0.5);
     public final int maxTreeSize = 50;
     @SuppressWarnings("FieldCanBeLocal")
@@ -62,24 +45,17 @@ public class LumberJack extends JavaPlugin {
     public TreeUtils treeUtils;
     public Messages messages;
     public ArrayList<String> disabledWorlds;
-    public ArrayList<String> treeBlockNames;
     boolean gravityEnabledByDefault = false;
-    HashMap<Player, PlayerSetting> perPlayerSettings;
+    public Enchantment requiredEnchantment;
+    ConcurrentMap<Player, PlayerSetting> perPlayerSettings;
     boolean debug = false;
-    private boolean usingMatchingConfig = true;
-    private CustomDropManager customDropManager;
-    public final Set<Integer> decayTasks = new HashSet<>();
-
-    public CustomDropManager getCustomDropManager() {
-        return customDropManager;
-    }
+    private final AtomicInteger decayTaskCount = new AtomicInteger();
 
     public HashSet<BukkitTask> getScheduledTasks() {
         return scheduledTasks;
     }
 
     private final HashSet<BukkitTask> scheduledTasks = new HashSet<>();
-    //ArrayList<String> treeGroundBlockNames;
 
     public static LumberJack getInstance() {
         return instance;
@@ -87,96 +63,38 @@ public class LumberJack extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
-        if (!McVersion.current().isAtLeast(1,16,3)) {
-            getLogger().severe("LumberJack requires AT LEAST Minecraft version 1.16.3!");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
-
         instance = this;
-        JeffLib.registerBlockTracker();
-
-        // %lumberjack_enabled%
-        PlaceholderAPIUtils.register("enabled", (player) -> {
-            if(!player.isOnline()) return "false";
-            return String.valueOf(getPlayerSetting(player.getPlayer()).gravityEnabled);
-        });
-
-        customDropManager = new CustomDropManager();
 
         createConfig();
-        //treeBlockNames = (ArrayList<String>) getConfig().getStringList("tree-blocks");
+        loadConfig();
 
-        treeBlockNames = new ArrayList<>();
-        treeBlockNames.addAll(Arrays.asList(treeBlocks));
-
-        //treeGroundBlockNames = (ArrayList<String>) getConfig().getStringList("tree-ground-blocks");
         messages = new Messages(this);
         treeUtils = new TreeUtils(this);
         BlockBreakListener blockBreakListener = new BlockBreakListener(this);
         BlockPlaceListener blockPlaceListener = new BlockPlaceListener(this);
         DecayListener decayListener = new DecayListener();
         PlayerListener playerListener = new PlayerListener(this);
-        CommandLumberjack commandLumberjack = new CommandLumberjack(this);
-        Objects.requireNonNull(getCommand("lumberjack")).setExecutor(commandLumberjack);
+
+        Objects.requireNonNull(getCommand("lumberjack"), "lumberjack command missing from plugin.yml")
+                .setExecutor(new CommandLumberjack(this));
+
+        getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(blockBreakListener, this);
         getServer().getPluginManager().registerEvents(blockPlaceListener, this);
         getServer().getPluginManager().registerEvents(playerListener, this);
         getServer().getPluginManager().registerEvents(decayListener, this);
+        getServer().getPluginManager().registerEvents(blockTracker, this);
 
-        perPlayerSettings = new HashMap<>();
-
-        gravityEnabledByDefault = getConfig().getBoolean("gravity-enabled-by-default");
-
-        Metrics metrics = new Metrics(this, 3184);
-        metrics.addCustomChart(new Metrics.SimplePie("gravity_enabled_by_default", () -> Boolean.toString(getConfig().getBoolean("gravity-enabled-by-default"))));
-        metrics.addCustomChart(new Metrics.SimplePie("using_matching_config", () -> Boolean.toString(usingMatchingConfig)));
-        metrics.addCustomChart(new Metrics.SimplePie("show_message_again_after_logout", () -> Boolean.toString(getConfig().getBoolean("show-message-again-after-logout"))));
-        metrics.addCustomChart(new Metrics.SimplePie("attached_logs_fall_down", () -> Boolean.toString(getConfig().getBoolean("attached-logs-fall-down"))));
-        metrics.addCustomChart(new Metrics.SimplePie("prevent_torch_exploit", () -> Boolean.toString(getConfig().getBoolean("prevent-torch-exploit"))));
-
-        UpdateChecker updateChecker = UpdateChecker.init(this, "https://api.jeff-media.de/lumberjack/latest-version.txt")
-                .setChangelogLink(SPIGOT_RESOURCE_ID)
-                .setDownloadLink(SPIGOT_RESOURCE_ID)
-                .setDonationLink("https://paypal.me/mfnalex")
-                .setUserAgent(UserAgentBuilder.getDefaultUserAgent());
-        if (Objects.requireNonNull(getConfig().getString("check-for-updates", "true")).equalsIgnoreCase("true")) {
-            updateChecker.checkNow().checkEveryXHours(getConfig().getDouble("check-interval"));
-        } // When set to on-startup, we check right now (delay 0)
-        else if (Objects.requireNonNull(getConfig().getString("check-for-updates", "true")).equalsIgnoreCase("on-startup")) {
-            updateChecker.checkNow();
-        }
+        perPlayerSettings = new ConcurrentHashMap<>();
 
         trackBlocks();
-
-        registerFarmLimiterEventListener();
-    }
-
-    private void registerFarmLimiterEventListener() {
-
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("FarmLimiter");
-        if(plugin == null) return;
-        try {
-            getLogger().warning("Oh, you are running FarmLimiter. Hooking into it now...");
-            Bukkit.getPluginManager().registerEvent((Class<? extends Event>) Class.forName("me.filoghost.farmlimiter.api.FarmLimitEvent"),new FarmLimiterListener(), EventPriority.HIGHEST,new FarmLimiterListener.FarmLimiterListenerEventExecutor(),this,false);
-            getLogger().warning("Hooked into FarmLimiter. However, PLEASE mock the FarmLimiter author to make their API publicly available in some maven repo. LumberJack currently has to rely on reflection to access its API.");
-        } catch (ClassNotFoundException ignored) {
-            ignored.printStackTrace();
-        }
     }
 
     private void trackBlocks() {
-        // Track all player placed logs
-        Collection<Material> trackedBlocks = new HashSet<>();
-        for (String name : treeBlockNames) {
-            Material mat = Enums.getIfPresent(Material.class, name).orNull();
-            if (mat != null) {
-                trackedBlocks.add(mat);
-                //System.out.println("Tracking material " + mat.name());
-            }
-        }
-        BlockTracker.addTrackedBlockTypes(trackedBlocks);
+        Set<Material> trackedBlocks = new HashSet<>(MaterialSetTag.LOGS.getValues());
+        trackedBlocks.removeAll(MaterialSetTag.MANGROVE_LOGS.getValues());
+
+        blockTracker.addTrackedBlockTypes(trackedBlocks);
     }
 
     private void showOldConfigWarning() {
@@ -194,8 +112,6 @@ public class LumberJack extends JavaPlugin {
             showOldConfigWarning();
             ConfigUpdater configUpdater = new ConfigUpdater(this);
             configUpdater.updateConfig();
-            usingMatchingConfig = true;
-            //createConfig();
         }
 
         File playerDataFolder = new File(getDataFolder().getPath() + File.separator + "playerdata");
@@ -204,7 +120,6 @@ public class LumberJack extends JavaPlugin {
         }
 
         getConfig().addDefault("gravity-enabled-by-default", false);
-        getConfig().addDefault("use-pdc",true);
         getConfig().addDefault("check-for-updates", "true");
         getConfig().addDefault("show-message-again-after-logout", true);
         getConfig().addDefault("attached-logs-fall-down", true);
@@ -214,10 +129,26 @@ public class LumberJack extends JavaPlugin {
         getConfig().addDefault("fast-leaves-decay", false);
         getConfig().addDefault("fast-leaves-decay-duration", 10);
         getConfig().addDefault("only-natural-logs", true);
+    }
 
+    private void loadConfig() {
         // Load disabled-worlds. If it does not exist in the config, it returns null. That's no problem
         disabledWorlds = (ArrayList<String>) getConfig().getStringList("disabled-worlds");
+        gravityEnabledByDefault = getConfig().getBoolean("gravity-enabled-by-default");
 
+        findEnchantment();
+    }
+
+    private void findEnchantment() {
+        NamespacedKey enchantmentKey = NamespacedKey.fromString(getConfig().getString("requires-enchantment", ""));
+
+        if (enchantmentKey != null) {
+            requiredEnchantment = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT).get(enchantmentKey);
+
+            if (requiredEnchantment == null) {
+                getSLF4JLogger().warn("Required enchantment {} does not exist", enchantmentKey);
+            }
+        }
     }
 
     public PlayerSetting getPlayerSetting(Player p) {
@@ -237,6 +168,11 @@ public class LumberJack extends JavaPlugin {
         }
     }
 
+    @EventHandler
+    public void onReload(ServerResourcesReloadedEvent e) {
+        findEnchantment();
+    }
+
     public void togglePlayerSetting(Player p) {
         registerPlayer(p);
         boolean enabled = perPlayerSettings.get(p).gravityEnabled;
@@ -244,22 +180,10 @@ public class LumberJack extends JavaPlugin {
     }
 
     public void registerPlayer(Player p) {
-        if (!perPlayerSettings.containsKey(p)) {
-
+        perPlayerSettings.computeIfAbsent(p, player -> {
             File playerFile = new File(getDataFolder() + File.separator + "playerdata",
-                    p.getUniqueId() + ".yml");
+                    player.getUniqueId() + ".yml");
             FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-
-            if(getConfig().getBoolean("use-pdc")) {
-                //System.out.println("PDC enabled");
-                if(playerFile.exists()) {
-                    playerFile.delete();
-                }
-                if(p.getPersistentDataContainer().has(new NamespacedKey(this,NBTKeys.SETTINGS),DataType.FILE_CONFIGURATION)) {
-                    //System.out.println("Loaded PDC");
-                    playerConfig = p.getPersistentDataContainer().get(new NamespacedKey(this, NBTKeys.SETTINGS),DataType.FILE_CONFIGURATION);
-                }
-            }
 
             boolean activeForThisPlayer;
 
@@ -273,37 +197,51 @@ public class LumberJack extends JavaPlugin {
             if (!getConfig().getBoolean("show-message-again-after-logout")) {
                 newSettings.hasSeenMessage = playerConfig.getBoolean("hasSeenMessage");
             }
-            perPlayerSettings.put(p, newSettings);
-        }
+            return newSettings;
+        });
     }
 
     public void unregisterPlayer(Player p) {
-        if (perPlayerSettings.containsKey(p)) {
-            PlayerSetting setting = getPlayerSetting(p);
+        PlayerSetting setting = perPlayerSettings.remove(p);
+        if (setting != null) {
             File playerFile = new File(getDataFolder() + File.separator + "playerdata",
                     p.getUniqueId() + ".yml");
             YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
             playerConfig.set("gravityEnabled", setting.gravityEnabled);
             playerConfig.set("hasSeenMessage", setting.hasSeenMessage);
 
-            if(getConfig().getBoolean("use-pdc")) {
-                p.getPersistentDataContainer().set(new NamespacedKey(this,NBTKeys.SETTINGS), DataType.FILE_CONFIGURATION,playerConfig);
-            } else {
-                try {
-                    playerConfig.save(playerFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                playerConfig.save(playerFile);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            perPlayerSettings.remove(p);
         }
     }
 
     public void reload() {
         reloadConfig();
-        customDropManager = new CustomDropManager();
+        loadConfig();
+    }
+
+    public BlockTracker getBlockTracker() {
+        return blockTracker;
+    }
+
+    public boolean tryStartDecayTask() {
+        int maxTasks = getConfig().getInt("max-decay-tasks", 1000);
+        while (true) {
+            int current = decayTaskCount.get();
+            if (current >= maxTasks) {
+                return false;
+            }
+            if (decayTaskCount.compareAndSet(current, current + 1)) {
+                return true;
+            }
+        }
+    }
+
+    public void finishDecayTask() {
+        decayTaskCount.updateAndGet(current -> Math.max(0, current - 1));
     }
 }
 	
-
