@@ -9,6 +9,7 @@ import de.jeff_media.lumberjack.listeners.BlockBreakListener;
 import de.jeff_media.lumberjack.listeners.BlockPlaceListener;
 import de.jeff_media.lumberjack.listeners.DecayListener;
 import de.jeff_media.lumberjack.listeners.PlayerListener;
+import de.jeff_media.lumberjack.placeholders.LumberJackPlaceholderExpansion;
 import de.jeff_media.lumberjack.utils.BlockTracker;
 import de.jeff_media.lumberjack.utils.TreeUtils;
 import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
@@ -17,6 +18,7 @@ import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -86,6 +88,10 @@ public class LumberJack extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(blockTracker, this);
 
         perPlayerSettings = new ConcurrentHashMap<>();
+
+        if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new LumberJackPlaceholderExpansion(this).register();
+        }
 
         trackBlocks();
     }
@@ -177,6 +183,25 @@ public class LumberJack extends JavaPlugin implements Listener {
         registerPlayer(p);
         boolean enabled = perPlayerSettings.get(p).gravityEnabled;
         perPlayerSettings.get(p).gravityEnabled = !enabled;
+    }
+
+    public boolean isGravityEnabled(OfflinePlayer p) {
+        if (p instanceof Player player) {
+            if (player.hasPermission("lumberjack.force") && !player.hasPermission("lumberjack.force.ignore")) {
+                return true;
+            }
+
+            return getPlayerSetting(player).gravityEnabled;
+        }
+
+        File playerFile = new File(getDataFolder() + File.separator + "playerdata", p.getUniqueId() + ".yml");
+        FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+
+        if (!playerConfig.isSet("gravityEnabled")) {
+            return gravityEnabledByDefault;
+        }
+
+        return playerConfig.getBoolean("gravityEnabled");
     }
 
     public void registerPlayer(Player p) {
